@@ -17,9 +17,6 @@ const NavBar = () => {
               Home
             </Link>
             <Link class="nav-link" to="/category">
-              Select Category
-            </Link>
-            <Link class="nav-link" to="/entry/new">
               New Entry
             </Link>
           </div>

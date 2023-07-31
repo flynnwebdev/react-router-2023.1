@@ -10,7 +10,7 @@ const CategorySelection = () => {
       <ul>
         {categories.map(cat => (
           <li key={cat}>
-            <Link to='/entry/new'>{cat}</Link>
+            <Link to={`/entry/new/${cat}`}>{cat}</Link>
           </li>
         ))}
       </ul>
