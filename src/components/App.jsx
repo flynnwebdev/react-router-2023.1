@@ -16,10 +16,14 @@ const App = () => {
   const nav = useNavigate()
   const [entries, setEntries] = useState([])
 
-  useEffect(async () => {
-    const res = await fetch('http://localhost:4001/entries')
-    const data = await res.json()
-    setEntries(data)
+  useEffect(() => {
+    // IIFE
+    (async () => {
+      const res = await fetch('http://localhost:4001/entries')
+      const data = await res.json()
+      setEntries(data)
+    })()
+    // getEntries()
   }, [])
 
   // HOC (higher-order component)
@@ -28,11 +32,17 @@ const App = () => {
     return <ShowEntry entry={entries[id]} />
   }
 
-  function addEntry(category, content) {
+  async function addEntry(category, content) {
     const id = entries.length
     // Add a new entry
-    const newEntry = { category, content }
-    setEntries([...entries, newEntry])
+    const returnedEntry = await fetch('http://localhost:4001/entries', {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ category, content })
+    })
+    setEntries([...entries, await returnedEntry.json()])
     nav(`/entry/${id}`)
   }
 
