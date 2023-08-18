@@ -1,29 +1,28 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useReducer } from "react"
 import Home from "./Home"
 import CategorySelection from "./CategorySelection"
 import NewEntry from "./NewEntry"
 import { BrowserRouter, Routes, Route, useParams, useNavigate } from "react-router-dom"
 import NavBar from "./NavBar"
 import ShowEntry from "./ShowEntry"
-
-// const seedEntries = [
-//   { category: "Food", content: "Pizza is yummy!" },
-//   { category: "Coding", content: "Coding is fun!" },
-//   { category: "Gaming", content: "Skyrim is for the Nords!" },
-// ]
+import { reducer, initialState } from "../reducer.js"
+import JournalContext from "../context"
 
 const App = () => {
   const nav = useNavigate()
-  const [entries, setEntries] = useState([])
+  const [store, dispatch] = useReducer(reducer, initialState)
+  const { entries } = store
 
   useEffect(() => {
     // IIFE
-    (async () => {
+    ;(async () => {
       const res = await fetch(`${import.meta.env.VITE_API_HOST}/entries`)
       const data = await res.json()
-      setEntries(data)
+      dispatch({
+        type: "setEntries",
+        entries: data,
+      })
     })()
-    // getEntries()
   }, [])
 
   // HOC (higher-order component)
@@ -42,23 +41,26 @@ const App = () => {
       },
       body: JSON.stringify({ category, content }),
     })
-    setEntries([...entries, await returnedEntry.json()])
+    dispatch({
+      type: "addEntry",
+      entry: await returnedEntry.json(),
+    })
     nav(`/entry/${id}`)
   }
 
   return (
-    <>
+    <JournalContext.Provider value={{ entries, addEntry }}>
       <NavBar />
       <Routes>
-        <Route path="/" element={<Home entries={entries} />} />
+        <Route path="/" element={<Home />} />
         <Route path="/category" element={<CategorySelection />} />
         <Route path="/entry">
           <Route path=":id" element={<ShowEntryWrapper />} />
-          <Route path="new/:category" element={<NewEntry addEntry={addEntry} />} />
+          <Route path="new/:category" element={<NewEntry />} />
         </Route>
         <Route path="*" element={<h3>Page not found</h3>} />
       </Routes>
-    </>
+    </JournalContext.Provider>
   )
 }
 
